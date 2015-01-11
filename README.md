@@ -1,5 +1,9 @@
 # Chart
 
+目前支援曲線圖，柱狀圖...並可同時顯示多種圖表
+會在陸續增加...
+如果想畫其他種圖形，可以extends Plotter，有提供每筆資料點位等參數
+
 ![Screenshot](https://github.com/cuber5566/Chart/blob/master/app/src/main/res/drawable-mdpi/chart_pic1.jpg)
 
 # ChartAdapter
