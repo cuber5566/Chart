@@ -137,40 +137,40 @@ public class Chart extends View implements View.OnTouchListener {
                 cur_move_x = move_x;
 
                 // zoom
-                if (event.getPointerCount() >= 2) {
-                    cur_zoom = Math.abs(event.getX(0) - event.getX(1));
-                    d_zoom = Math.abs(cur_zoom) - Math.abs(last_zoom);
-                    last_zoom = cur_zoom;
-
-                    labelSpaceX += d_zoom;
-
-                    minScreenX -= d_zoom;
-                    //zoom in max
-                    double a_data = mAdapter.getMaxDataX() - mAdapter.getMinDataX();
-                    if (labelSpaceX * a_data < mWidth) {
-                        labelSpaceX = (float) (mWidth / a_data);
-                    }
-                    //zoom out max
-                    else if (labelSpaceX >= mWidth) {
-                        labelSpaceX = mWidth;
-                    }
-
-                    move_x = (int)(last_move_x * cur_screen_x / last_screen_x);
-                    last_move_x = move_x;
-                    last_screen_x = cur_screen_x;
-
+//                if (event.getPointerCount() >= 2) {
+//                    cur_zoom = Math.abs(event.getX(0) - event.getX(1));
+//                    d_zoom = Math.abs(cur_zoom) - Math.abs(last_zoom);
+//                    last_zoom = cur_zoom;
+//
+//                    labelSpaceX += d_zoom;
+//
+//                    minScreenX -= d_zoom;
+//                    //zoom in max
+//                    double a_data = mAdapter.getMaxDataX() - mAdapter.getMinDataX();
+//                    if (labelSpaceX * a_data < mWidth) {
+//                        labelSpaceX = (float) (mWidth / a_data);
+//                    }
+//                    //zoom out max
+//                    else if (labelSpaceX >= mWidth) {
+//                        labelSpaceX = mWidth;
+//                    }
+//
+//                    move_x = (int)(last_move_x * cur_screen_x / last_screen_x);
+//                    last_move_x = move_x;
+//                    last_screen_x = cur_screen_x;
+//
 
 //                    Log.i("DEBUG", "cur_zoom:" + cur_zoom + " , last_zoom:" + last_zoom + " ,d_zoom:" + d_zoom + ", labelSpaceX:" + labelSpaceX + " , move_x" + move_x);
-                }
+//                }
 
                 // move
-                else {
+//                else {
                     cur_x = event.getX();
 
                     d_x = cur_x - last_x;
                     last_x = cur_x;
                     move_x += d_x;
-                }
+//                }
 
                 //move left max
                 if (move_x < 0) {
