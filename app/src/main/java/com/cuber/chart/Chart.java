@@ -109,14 +109,10 @@ public class Chart extends View implements View.OnTouchListener {
     float d_x;
     float d_zoom;
 
-    float last_screen_x;
-    float cur_screen_x;
-    float last_move_x;
-    float cur_move_x;
+    float last_labelSpaceX;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
@@ -126,51 +122,45 @@ public class Chart extends View implements View.OnTouchListener {
 
             case MotionEvent.ACTION_POINTER_DOWN:
                 cur_zoom = last_zoom = event.getX(0) - event.getX(1);
-                cur_screen_x = last_screen_x = maxScreenX - minScreenX;
-                cur_move_x = last_move_x = move_x;
-
                 break;
 
             case MotionEvent.ACTION_MOVE:
 
-                cur_screen_x = maxScreenX;
-                cur_move_x = move_x;
+                last_labelSpaceX = labelSpaceX;
 
                 // zoom
-//                if (event.getPointerCount() >= 2) {
-//                    cur_zoom = Math.abs(event.getX(0) - event.getX(1));
-//                    d_zoom = Math.abs(cur_zoom) - Math.abs(last_zoom);
-//                    last_zoom = cur_zoom;
-//
-//                    labelSpaceX += d_zoom;
-//
-//                    minScreenX -= d_zoom;
-//                    //zoom in max
-//                    double a_data = mAdapter.getMaxDataX() - mAdapter.getMinDataX();
-//                    if (labelSpaceX * a_data < mWidth) {
-//                        labelSpaceX = (float) (mWidth / a_data);
-//                    }
-//                    //zoom out max
-//                    else if (labelSpaceX >= mWidth) {
-//                        labelSpaceX = mWidth;
-//                    }
-//
-//                    move_x = (int)(last_move_x * cur_screen_x / last_screen_x);
-//                    last_move_x = move_x;
-//                    last_screen_x = cur_screen_x;
-//
+                if (event.getPointerCount() > 1) {
+                    Log.i("DEBUG", "zoom: " + event.getPointerCount());
 
-//                    Log.i("DEBUG", "cur_zoom:" + cur_zoom + " , last_zoom:" + last_zoom + " ,d_zoom:" + d_zoom + ", labelSpaceX:" + labelSpaceX + " , move_x" + move_x);
-//                }
+                    cur_zoom = Math.abs(event.getX(0) - event.getX(1));
+                    d_zoom = Math.abs(cur_zoom) - Math.abs(last_zoom);
+                    last_zoom = cur_zoom;
+
+                    labelSpaceX += d_zoom;
+
+                    //zoom in max
+                    double a_data = mAdapter.getMaxDataX() - mAdapter.getMinDataX();
+                    if (labelSpaceX * a_data < mWidth) {
+                        labelSpaceX = (float) (mWidth / a_data);
+                    }
+                    //zoom out max
+                    else if (labelSpaceX >= mWidth) {
+                        labelSpaceX = mWidth;
+                    }
+
+                    move_x *= labelSpaceX / last_labelSpaceX;
+
+                }
 
                 // move
-//                else {
+                else {
+                    Log.i("DEBUG", "move" + event.getPointerCount());
                     cur_x = event.getX();
 
                     d_x = cur_x - last_x;
                     last_x = cur_x;
                     move_x += d_x;
-//                }
+                }
 
                 //move left max
                 if (move_x < 0) {
@@ -181,11 +171,17 @@ public class Chart extends View implements View.OnTouchListener {
                     move_x = maxScreenX - mWidth;
                 }
 
-//                Log.i("DEBUG", "move_x: " + move_x);
                 invalidate();
-                Log.i("Graphic", "" + move_x);
                 break;
             case MotionEvent.ACTION_UP:
+                break;
+
+            case MotionEvent.ACTION_POINTER_UP:
+                //pointer0 & pointer1 both may be up
+                //if pointer0 up ,last_x change to pointer1
+                if ((event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) == 0) {
+                    last_x = event.getX(1);
+                }
                 break;
         }
         return true;
