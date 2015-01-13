@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by cuber on 2015/1/7.
  */
-public  abstract class ChartBaseAdapter implements ChartAdapter {
+public abstract class ChartBaseAdapter implements ChartAdapter {
 
     public static final String DRAWING_OPTION_PLOTTER = "DRAWING_OPTION_PLOTTER";
 
@@ -35,7 +35,7 @@ public  abstract class ChartBaseAdapter implements ChartAdapter {
                 min = v < min ? v : min;
             }
         }
-        return min - 2;
+        return min - 2 * getXMinorGridGap();
     }
 
     public double getMaxDataX() {
@@ -46,7 +46,7 @@ public  abstract class ChartBaseAdapter implements ChartAdapter {
                 max = v > max ? v : max;
             }
         }
-        return max + 2;
+        return max + 2 * getXMinorGridGap();
     }
 
     public double getMinDataY() {

@@ -110,7 +110,7 @@ public class MyAdapter extends ChartBaseAdapter {
 
     @Override
     public long getXMinorGridGap() {
-        return 1;
+        return 2;
     }
 
     @Override
