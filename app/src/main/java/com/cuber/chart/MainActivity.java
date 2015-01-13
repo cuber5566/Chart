@@ -5,9 +5,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.cuber.library.BarPlotter;
+import com.cuber.library.Chart;
+import com.cuber.library.LinePlotter;
+import com.cuber.library.Plotter;
+
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class MainActivity extends ActionBarActivity {
 

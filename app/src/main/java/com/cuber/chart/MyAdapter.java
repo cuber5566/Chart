@@ -1,5 +1,9 @@
 package com.cuber.chart;
 
+import com.cuber.library.Chart;
+import com.cuber.library.ChartBaseAdapter;
+import com.cuber.library.Plotter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

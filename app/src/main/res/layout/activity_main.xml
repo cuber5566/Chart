@@ -7,7 +7,7 @@
     <view
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.cuber.chart.Chart"
+        class="com.cuber.library.Chart"
         android:id="@+id/graphics"
         android:layout_centerVertical="true"
         android:paddingBottom="16dp"

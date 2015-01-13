@@ -7,6 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 13
         targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
     }
     buildTypes {
         release {
@@ -17,4 +19,6 @@ android {
 }
 
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.0.3'
 }

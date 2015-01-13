@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -33,6 +34,7 @@ public class Chart extends View implements View.OnTouchListener {
     private float mTextSizeX = 48;//px
     private float mTextSizeY = 48;//px
 
+
     //temp
     private float move_x;
 
@@ -40,6 +42,8 @@ public class Chart extends View implements View.OnTouchListener {
         super(context, attrs);
 
         setOnTouchListener(this);
+
+        ViewPager v;
 
         mResources = context.getResources();
         mPadding_bottom = convertDpToPixel((int) mPadding_bottom);
