@@ -35,7 +35,8 @@ public abstract class ChartBaseAdapter implements ChartAdapter {
                 min = v < min ? v : min;
             }
         }
-        return min - 2 * getXMinorGridGap();
+        min = min - 2 * getXMinorGridGap();
+        return min - min % getXMajorGridGroup();
     }
 
     public double getMaxDataX() {
@@ -57,7 +58,8 @@ public abstract class ChartBaseAdapter implements ChartAdapter {
                 min = v < min ? v : min;
             }
         }
-        return min - getYRange() * 0.2f;
+        min = min - getYRange() * 0.2f;
+        return min - min % getYMajorGridGroup();
     }
 
     public double getMaxDataY() {
