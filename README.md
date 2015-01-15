@@ -89,3 +89,15 @@ public  abstract class ChartBaseAdapter implements ChartAdapter {
 # Plotter
 
 only support LinePlotter&BarPlotter now
+
+# Listener
+``` java
+public interface OnScrollChangeListener {
+
+        public void onScrollChange(float offset);
+        
+        public void onXValueChange(double XValue);
+        
+}
+
+```
