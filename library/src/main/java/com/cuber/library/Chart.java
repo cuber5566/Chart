@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -36,13 +35,23 @@ public class Chart extends View implements View.OnTouchListener {
     private float mShortLineLength = 8;
 
     //display
-    private boolean showMinorXLine = false;
-    private boolean showMajorXLine = false;
-    private boolean showMinorYLine = false;
-    private boolean showMajorYLine = false;
+    private boolean showMinorXLine = true;
+    private boolean showMajorXLine = true;
+    private boolean showMinorYLine = true;
+    private boolean showMajorYLine = true;
 
     //temp
     private float move_x;
+
+    //interface
+    private OnScrollChangeListener listener;
+    private double callbackValue;
+
+    public interface OnScrollChangeListener {
+        public void onScrollChange(float offset);
+
+        public void onXValueChange(double XValue);
+    }
 
     public Chart(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -108,18 +117,26 @@ public class Chart extends View implements View.OnTouchListener {
 
     public void showMinorXLine(boolean show) {
         this.showMinorXLine = show;
+        invalidate();
     }
 
     public void showMajorXLine(boolean show) {
         this.showMajorXLine = show;
+        invalidate();
     }
 
     public void showMinorYLine(boolean show) {
         this.showMinorYLine = show;
+        invalidate();
     }
 
     public void showMajorYLine(boolean show) {
         this.showMajorYLine = show;
+        invalidate();
+    }
+
+    public void setOnScrollChangeListener(OnScrollChangeListener listener) {
+        this.listener = listener;
     }
 
     float last_x = 0;
@@ -152,7 +169,6 @@ public class Chart extends View implements View.OnTouchListener {
 
                 // zoom
                 if (event.getPointerCount() > 1) {
-                    Log.i("DEBUG", "zoom: " + event.getPointerCount());
 
                     cur_zoom = Math.abs(event.getX(0) - event.getX(1));
                     d_zoom = Math.abs(cur_zoom) - Math.abs(last_zoom);
@@ -176,7 +192,6 @@ public class Chart extends View implements View.OnTouchListener {
 
                 // move
                 else {
-                    Log.i("DEBUG", "move" + event.getPointerCount());
                     cur_x = event.getX();
 
                     d_x = cur_x - last_x;
@@ -206,6 +221,9 @@ public class Chart extends View implements View.OnTouchListener {
                 }
                 break;
         }
+        if (listener != null)
+            listener.onScrollChange(move_x);
+
         return true;
     }
 
@@ -231,6 +249,7 @@ public class Chart extends View implements View.OnTouchListener {
 
         canvas.restore();
         drawLeftSide(canvas);
+
     }
 
     private void drawYLine(Canvas canvas) {
@@ -262,24 +281,29 @@ public class Chart extends View implements View.OnTouchListener {
 
         double gap = mAdapter.getXMinorGridGap();
         double startX = convertScreenXToDataX(maxScreenX - move_x - mWidth);
+        double endX = convertScreenXToDataX(maxScreenX - move_x);
         startX -= (startX - minDataX) % gap;
 
         // draw minor lines
         if (showMinorXLine) {
-            for (double i = startX; i < maxDataX; i += gap) {
+            for (double i = startX; i < endX; i += gap) {
                 float x = (move_x + convertDataXToScreenX(i) - (maxScreenX - mWidth));
                 if (x > maxScreenX) break;
                 canvas.drawLine(x, 0, x, maxScreenY, mPaint_gray);
             }
         }
 
-        // draw major lines
+        if (listener != null && callbackValue != endX - endX % gap) {
+            callbackValue = endX - endX % gap;
+            listener.onXValueChange(callbackValue);
+        }
 
+        // draw major lines
         gap *= mAdapter.getXMajorGridGroup();
-        startX = convertScreenXToDataX(maxScreenX - move_x - mWidth);
         startX -= (startX - minDataX) % gap;
 
-        for (double i = startX; i < maxDataX; i += gap) {
+        double i;
+        for (i = startX; i < endX; i += gap) {
             float x = (move_x + convertDataXToScreenX(i) - (maxScreenX - mWidth));
             if (x > maxScreenX) break;
 
