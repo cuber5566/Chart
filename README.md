@@ -5,7 +5,7 @@
 * 如果想畫其他種圖形，可以extends Plotter，有提供每筆資料點位等參數
 
 ![Screenshot](https://github.com/cuber5566/Chart/blob/master/app/src/main/res/drawable-mdpi/chart_pic1.jpg)
-
+![Screenshot](https://github.com/cuber5566/Chart/blob/master/app/src/main/res/drawable-mdpi/chart_pic2.jpg)
 # ChartAdapter
 ``` java
 public interface ChartAdapter {
