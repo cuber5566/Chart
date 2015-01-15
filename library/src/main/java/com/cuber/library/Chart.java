@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,17 +22,24 @@ public class Chart extends View implements View.OnTouchListener {
     private Rect textBounds = new Rect();
     protected ChartBaseAdapter mAdapter;
 
-    protected float minScreenX, maxScreenX, minScreenY, maxScreenY;
+    protected float maxScreenX, maxScreenY;
     private double minDataX, maxDataX, minDataY, maxDataY;
 
     private float mWidth, mHeight;
     private Paint mPaint_gray, mPaint_black, mPaint_textX, mPaint_textY;
     private float mPadding_bottom = 32;//dp
+    private float mPadding_left = 32;//dp
     private float mPadding_text = 2;//dp
     private float labelSpaceX = 40;//56
     private float mTextSizeX = 48;//px
     private float mTextSizeY = 48;//px
+    private float mShortLineLength = 8;
 
+    //display
+    private boolean showMinorXLine = false;
+    private boolean showMajorXLine = false;
+    private boolean showMinorYLine = false;
+    private boolean showMajorYLine = false;
 
     //temp
     private float move_x;
@@ -43,11 +49,11 @@ public class Chart extends View implements View.OnTouchListener {
 
         setOnTouchListener(this);
 
-        ViewPager v;
-
         mResources = context.getResources();
         mPadding_bottom = convertDpToPixel((int) mPadding_bottom);
+        mPadding_left = convertDpToPixel((int) mPadding_left);
         mPadding_text = convertDpToPixel((int) mPadding_text);
+        mShortLineLength = convertDpToPixel((int) mShortLineLength);
         labelSpaceX = convertDpToPixel((int) labelSpaceX);
 
         mPaint_gray = new Paint() {
@@ -98,6 +104,22 @@ public class Chart extends View implements View.OnTouchListener {
 
     public void setLabelSpaceX(int labelSpaceX) {
         this.labelSpaceX = convertDpToPixel(labelSpaceX);
+    }
+
+    public void showMinorXLine(boolean show) {
+        this.showMinorXLine = show;
+    }
+
+    public void showMajorXLine(boolean show) {
+        this.showMajorXLine = show;
+    }
+
+    public void showMinorYLine(boolean show) {
+        this.showMinorYLine = show;
+    }
+
+    public void showMajorYLine(boolean show) {
+        this.showMajorYLine = show;
     }
 
     float last_x = 0;
@@ -194,53 +216,65 @@ public class Chart extends View implements View.OnTouchListener {
         mWidth = canvas.getWidth();
         mHeight = canvas.getHeight();
 
-        minScreenY = 0;
-        minScreenX = 0;
         maxScreenY = mHeight - mPadding_bottom;
 
         double max = ((maxDataX - minDataX) / mAdapter.getXMinorGridGap()) * labelSpaceX;
         maxScreenX = (float) max > mWidth ? (float) max : mWidth;
 
+        canvas.save();
+        canvas.clipRect(mPadding_left, 0, mWidth, mHeight);
+
         drawXLine(canvas);
         drawYLine(canvas);
-
         for (int i = 0; i < mAdapter.getCountOfDataSet(); i++)
             drawGraphic(canvas, i);
+
+        canvas.restore();
+        drawLeftSide(canvas);
     }
 
     private void drawYLine(Canvas canvas) {
-        // draw minor lines
+
         double gap = mAdapter.getYMinorGridGap();
-        for (double i = minDataY; i < maxDataY; i += gap) {
-            float y = convertDataYToScreenY(i);
-            canvas.drawLine(minScreenX, y, maxScreenX, y, mPaint_gray);
+
+        // draw minor lines
+        if (showMinorYLine) {
+            for (double i = minDataY; i < maxDataY; i += gap) {
+                float y = convertDataYToScreenY(i);
+                canvas.drawLine(0, y, maxScreenX, y, mPaint_gray);
+            }
         }
 
         // draw major lines
-        gap *= mAdapter.getYMajorGridGroup();
-        for (double i = minDataY; i < maxDataY; i += gap) {
+        if (showMajorYLine) {
+            gap *= mAdapter.getYMajorGridGroup();
+            for (double i = minDataY; i < maxDataY; i += gap) {
 
-            float y = convertDataYToScreenY(i);
-            canvas.drawText(mAdapter.getYLabelForYValue(i), minScreenX, convertDataYToScreenY(i) - mPadding_text, mPaint_textY);
-            canvas.drawLine(minScreenX, y, maxScreenX, y, mPaint_black);
+                float y = convertDataYToScreenY(i);
+                canvas.drawText(mAdapter.getYLabelForYValue(i), 0, convertDataYToScreenY(i) - mPadding_text, mPaint_textY);
+
+                canvas.drawLine(0, y, maxScreenX, y, mPaint_black);
+            }
         }
     }
 
     private void drawXLine(Canvas canvas) {
 
         double gap = mAdapter.getXMinorGridGap();
-
         double startX = convertScreenXToDataX(maxScreenX - move_x - mWidth);
         startX -= (startX - minDataX) % gap;
 
         // draw minor lines
-        for (double i = startX; i < maxDataX; i += gap) {
-            float x = (move_x + convertDataXToScreenX(i) - (maxScreenX - mWidth));
-            if (x > maxScreenX) break;
-            canvas.drawLine(x, minScreenY, x, maxScreenY, mPaint_gray);
+        if (showMinorXLine) {
+            for (double i = startX; i < maxDataX; i += gap) {
+                float x = (move_x + convertDataXToScreenX(i) - (maxScreenX - mWidth));
+                if (x > maxScreenX) break;
+                canvas.drawLine(x, 0, x, maxScreenY, mPaint_gray);
+            }
         }
 
         // draw major lines
+
         gap *= mAdapter.getXMajorGridGroup();
         startX = convertScreenXToDataX(maxScreenX - move_x - mWidth);
         startX -= (startX - minDataX) % gap;
@@ -252,8 +286,13 @@ public class Chart extends View implements View.OnTouchListener {
             String text = mAdapter.getXLabelForXValue(i);
             mPaint_textX.getTextBounds(text, 0, text.length(), textBounds);
 
-            canvas.drawText(text, (x - textBounds.width() / 2), (maxScreenY + textBounds.height() + mPadding_text), mPaint_textX);
-            canvas.drawLine(x, minScreenY, x, maxScreenY, mPaint_black);
+            canvas.drawText(text, (x - textBounds.width() / 2), (maxScreenY + textBounds.height() + mShortLineLength / 2), mPaint_textX);
+
+            if (showMajorXLine) {
+                canvas.drawLine(x, 0, x, maxScreenY, mPaint_black);
+            } else {
+                canvas.drawLine(x, mHeight - mPadding_bottom - mShortLineLength, x, mHeight - mPadding_bottom, mPaint_black);
+            }
         }
     }
 
@@ -299,9 +338,9 @@ public class Chart extends View implements View.OnTouchListener {
             boolean canSkip;
 
             if (last_p == null) {
-                canSkip = (x < minScreenX || x > maxScreenX);
+                canSkip = (x < 0 || x > maxScreenX);
             } else {
-                canSkip = (x < minScreenX && last_p.x < minScreenX) ||
+                canSkip = (x < 0 && last_p.x < 0) ||
                         (x > maxScreenX && last_p.x > maxScreenX);
             }
 
@@ -313,27 +352,47 @@ public class Chart extends View implements View.OnTouchListener {
         }
     }
 
+    private void drawLeftSide(Canvas canvas) {
+
+        double gap = mAdapter.getYMinorGridGap();
+        gap *= mAdapter.getYMajorGridGroup();
+
+        for (double i = minDataY; i < maxDataY; i += gap) {
+
+            float y = convertDataYToScreenY(i);
+            String text = mAdapter.getYLabelForYValue(i);
+            mPaint_textX.getTextBounds(text, 0, text.length(), textBounds);
+
+            canvas.drawText(text, mPadding_left - textBounds.width() - mPadding_text, y, mPaint_textX);
+            canvas.drawLine(mPadding_left, y, mPadding_left + mShortLineLength, y, mPaint_black);
+        }
+
+        //X,Y Base Line
+        canvas.drawLine(mPadding_left, maxScreenY, mWidth, maxScreenY, mPaint_black);
+        canvas.drawLine(mPadding_left, 0, mPadding_left, maxScreenY, mPaint_black);
+    }
+
     protected float convertDpToPixel(int dp) {
         return dp * (mResources.getDisplayMetrics().densityDpi / 160f);
     }
 
     protected float convertDataXToScreenX(double dataX) {
 
-        return (float) ((dataX - minDataX) * (maxScreenX - minScreenX) / (maxDataX - minDataX) + minScreenX);
+        return (float) ((dataX - minDataX) * maxScreenX / (maxDataX - minDataX));
     }
 
     protected double convertScreenXToDataX(float screenX) {
 
-        return (screenX - minScreenX) * (maxDataX - minDataX) / (maxScreenX - minScreenX) + minDataX;
+        return screenX * (maxDataX - minDataX) / maxScreenX + minDataX;
     }
 
     protected float convertDataYToScreenY(double dataY) {
 
-        return (float) (maxScreenY - (dataY - minDataY) * (maxScreenY - minScreenY) / (maxDataY - minDataY) + minScreenY);
+        return (float) (maxScreenY - (dataY - minDataY) * maxScreenY / (maxDataY - minDataY));
     }
 
     protected double convertScreenYToDataY(float screenY) {
 
-        return (screenY - minScreenY) * (maxDataY - minDataY) / (maxScreenY - minScreenY) + minDataY;
+        return screenY * (maxDataY - minDataY) / maxScreenY + minDataY;
     }
 }
